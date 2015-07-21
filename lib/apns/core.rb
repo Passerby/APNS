@@ -7,10 +7,11 @@ module APNS
   @port = 2195
   # openssl pkcs12 -in mycert.p12 -out client-cert.pem -nodes -clcerts
   @pem = nil # this should be the path of the pem file not the contentes
+  @pkey = nil
   @pass = nil
 
   class << self
-    attr_accessor :host, :pem, :port, :pass
+    attr_accessor :host, :pem, :port, :pass, :pkey
   end
 
   def self.send_notification(device_token, message)
@@ -69,7 +70,7 @@ module APNS
 
     context      = OpenSSL::SSL::SSLContext.new
     context.cert = OpenSSL::X509::Certificate.new(File.read(self.pem))
-    context.key  = OpenSSL::PKey::RSA.new(File.read(self.pem), self.pass)
+    context.key  = OpenSSL::PKey::RSA.new(File.read(self.pkey))
 
     sock         = TCPSocket.new(self.host, self.port)
     ssl          = OpenSSL::SSL::SSLSocket.new(sock,context)
@@ -84,7 +85,7 @@ module APNS
 
     context      = OpenSSL::SSL::SSLContext.new
     context.cert = OpenSSL::X509::Certificate.new(File.read(self.pem))
-    context.key  = OpenSSL::PKey::RSA.new(File.read(self.pem), self.pass)
+    context.key  = OpenSSL::PKey::RSA.new(File.read(self.pkey))
 
     fhost = self.host.gsub('gateway','feedback')
     puts fhost
